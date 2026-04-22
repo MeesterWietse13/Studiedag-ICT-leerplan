@@ -2,9 +2,8 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   CheckCircle2, HelpCircle, ChevronUp, Info, Lightbulb,
   LayoutList, Save, AlertCircle, PlayCircle, Cloud, Loader2, ArrowLeft,
-  Baby, BookOpen, Monitor, Rocket, Download
+  Baby, BookOpen, Monitor, Rocket, Download, Printer
 } from 'lucide-react';
-import html2pdf from 'html2pdf.js';
 import { supabase } from './supabaseClient';
 import { LEERPLAN_DATA } from './data';
 
@@ -178,39 +177,11 @@ export default function App() {
     }, { onConflict: 'groep' });
   };
 
-  const samenvattingRef = useRef(null);
-  const [isExporting, setIsExporting] = useState(false);
-
-  const handleDownloadPDF = async () => {
-    if (isExporting) return;
-    
-    const element = samenvattingRef.current;
-    if (!element) return;
-
-    setIsExporting(true);
-
-    try {
-      const opt = {
-        margin: [10, 10, 10, 10],
-        filename: `ICT_Actieplan_${GROUPS[selectedGroup].name}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 2, 
-          useCORS: true, 
-          logging: false,
-          scrollY: 0,
-          scrollX: 0
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-
-      // We use the worker pattern to ensure it completes or fails cleanly
-      await html2pdf().set(opt).from(element).save();
-    } catch (error) {
-      console.error('PDF Generation Error:', error);
-    } finally {
-      setIsExporting(false);
-    }
+  const handlePrint = () => {
+    // A slight timeout ensures any React state flushes before rendering the print dialog
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
   const groupedGoals = useMemo(() => {
@@ -305,21 +276,16 @@ export default function App() {
                   <div className="mb-8 flex justify-between items-center no-print">
                     <h2 className="text-3xl font-extrabold text-slate-800 mb-2">Actieplan ({GROUPS[selectedGroup].name})</h2>
                     <button 
-                      onClick={handleDownloadPDF} 
-                      disabled={isExporting}
-                      className={`${isExporting ? 'bg-slate-400' : 'bg-blue-600 hover:bg-blue-700'} text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center shadow-md transition-all disabled:cursor-not-allowed`}
+                      onClick={handlePrint} 
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center shadow-md transition-all"
                     >
-                      {isExporting ? (
-                        <><Loader2 size={18} className="mr-2 animate-spin" /> Bezig met PDF...</>
-                      ) : (
-                        <><Download size={18} className="mr-2" /> Opslaan als PDF</>
-                      )}
+                      <Printer size={18} className="mr-2" /> Print / Opslaan als PDF
                     </button>
                   </div>
-                  <div ref={samenvattingRef} className="pdf-container">
-                    <div className="hidden pdf-only mb-6">
-                      <h1 className="text-2xl font-bold text-slate-800">ICT Actieplan - {GROUPS[selectedGroup].name}</h1>
-                      <p className="text-slate-500">Gegenereerd op {new Date().toLocaleDateString('nl-BE')}</p>
+                  <div className="print-container">
+                    <div className="hidden print:block mb-8">
+                      <h1 className="text-3xl font-bold text-slate-800 border-b-2 border-slate-200 pb-2 mb-2">ICT Actieplan - {GROUPS[selectedGroup].name}</h1>
+                      <p className="text-slate-500 font-medium pb-4">Gegenereerd op {new Date().toLocaleDateString('nl-BE')}</p>
                     </div>
                     {onderwerpen.map(onderwerp => {
                   const goalsInOnderwerp = filteredData.filter(d => d.onderwerp === onderwerp);
@@ -328,13 +294,13 @@ export default function App() {
                   if (!hasAction) return null;
                   
                   return (
-                    <div key={onderwerp} className="bg-white rounded-xl shadow-sm border mb-6 overflow-hidden">
-                      <div className={`${THEME_COLORS[onderwerp].header} px-6 py-4 text-white`}><h3 className="font-bold text-xl">{onderwerp}</h3></div>
+                    <div key={onderwerp} className="bg-white rounded-xl shadow-sm border mb-6 overflow-hidden max-w-full print:break-inside-avoid print:shadow-none print:border-slate-300">
+                      <div className={`${THEME_COLORS[onderwerp].header} px-6 py-4 text-white print:bg-white print:text-black print:border-b print:border-slate-300`}><h3 className="font-bold text-xl">{onderwerp}</h3></div>
                       <div className="p-6 space-y-6">
                         {subthemas.map(subthema => {
                           if (!notes[subthema] && !goalsInOnderwerp.some(g => g.subthema === subthema && statuses[g.id])) return null;
                           return (
-                            <div key={subthema} className="p-5 bg-slate-50 border rounded-lg">
+                            <div key={subthema} className="p-5 bg-slate-50 border rounded-lg print:break-inside-avoid print:bg-white print:border-slate-200">
                               <h4 className="font-bold text-lg mb-3">{subthema}</h4>
                               <p className="text-sm whitespace-pre-line bg-white p-3 rounded shadow-sm border font-medium text-slate-700">{notes[subthema] || "Geen notities"}</p>
                             </div>
