@@ -17,3 +17,15 @@
 .pdf-container .pdf-only {
   display: block;
 }
+
+/* Fix for html2pdf/html2canvas oklch error: force standard colors in PDF container */
+.pdf-container {
+  color-scheme: light;
+  --tw-text-opacity: 1;
+  color: rgb(30, 41, 59); /* slate-800 fallback */
+}
+
+.pdf-container * {
+  /* Prevent oklch parsing errors by overriding potential variables */
+  --tw-ring-color: transparent !important;
+}
