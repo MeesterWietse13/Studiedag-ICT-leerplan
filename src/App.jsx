@@ -179,20 +179,38 @@ export default function App() {
   };
 
   const samenvattingRef = useRef(null);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
+    if (isExporting) return;
+    
     const element = samenvattingRef.current;
     if (!element) return;
 
-    const opt = {
-      margin: [10, 10, 10, 10],
-      filename: `ICT_Actieplan_${GROUPS[selectedGroup].name}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
+    setIsExporting(true);
 
-    html2pdf().set(opt).from(element).save();
+    try {
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `ICT_Actieplan_${GROUPS[selectedGroup].name}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          logging: false,
+          scrollY: 0,
+          scrollX: 0
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      // We use the worker pattern to ensure it completes or fails cleanly
+      await html2pdf().set(opt).from(element).save();
+    } catch (error) {
+      console.error('PDF Generation Error:', error);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const groupedGoals = useMemo(() => {
@@ -284,10 +302,18 @@ export default function App() {
               </div>
             ) : (
                 <div className="animate-in fade-in duration-300">
-                  <div className="mb-8 flex justify-between items-center">
+                  <div className="mb-8 flex justify-between items-center no-print">
                     <h2 className="text-3xl font-extrabold text-slate-800 mb-2">Actieplan ({GROUPS[selectedGroup].name})</h2>
-                    <button onClick={handleDownloadPDF} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center shadow-md transition-all">
-                      <Download size={18} className="mr-2" /> Opslaan als PDF
+                    <button 
+                      onClick={handleDownloadPDF} 
+                      disabled={isExporting}
+                      className={`${isExporting ? 'bg-slate-400' : 'bg-blue-600 hover:bg-blue-700'} text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center shadow-md transition-all disabled:cursor-not-allowed`}
+                    >
+                      {isExporting ? (
+                        <><Loader2 size={18} className="mr-2 animate-spin" /> Bezig met PDF...</>
+                      ) : (
+                        <><Download size={18} className="mr-2" /> Opslaan als PDF</>
+                      )}
                     </button>
                   </div>
                   <div ref={samenvattingRef} className="pdf-container">
