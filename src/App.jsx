@@ -235,7 +235,8 @@ export default function App() {
   }
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-900 flex flex-col md:flex-row">
-      <div className="w-full md:w-72 bg-white shadow-md flex-shrink-0 flex flex-col z-10">
+      {/* Sticky Sidebar */}
+      <div className="w-full md:w-72 bg-white shadow-md flex-shrink-0 flex flex-col z-10 md:sticky md:top-0 md:h-screen">
         <div className="p-6 border-b border-slate-100 bg-slate-800 text-white relative">
           <button onClick={() => setSelectedGroup(null)} className="flex items-center text-slate-400 hover:text-white text-xs uppercase font-bold tracking-wider mb-4 transition-colors">
             <ArrowLeft size={14} className="mr-1" /> Terug naar start
@@ -250,23 +251,24 @@ export default function App() {
             {onderwerpen.map(onderwerp => {
               const theme = THEME_COLORS[onderwerp] || THEME_COLORS["Digitale informatievaardigheid"];
               return (
-                <button key={onderwerp} onClick={() => setActiveTab(onderwerp)} className={`w-full text-left px-3 py-3 rounded-lg text-sm font-bold transition-all border-l-4 ${ activeTab === onderwerp ? `${theme.bg} ${theme.text} ${theme.border} shadow-sm` : 'bg-white border-transparent text-slate-600 hover:bg-slate-50'}`}>
+                <button key={onderwerp} onClick={() => { setActiveTab(onderwerp); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`w-full text-left px-3 py-3 rounded-lg text-sm font-bold transition-all border-l-4 ${ activeTab === onderwerp ? `${theme.bg} ${theme.text} ${theme.border} shadow-sm` : 'bg-white border-transparent text-slate-600 hover:bg-slate-50'}`}>
                   {onderwerp}
                 </button>
               );
             })}
           </nav>
           <div className="mt-8 pt-6 border-t border-slate-200">
-            <button onClick={() => setActiveTab('Samenvatting')} className={`w-full text-left px-4 py-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center shadow-md ${ activeTab === 'Samenvatting' ? 'bg-blue-600 text-white' : 'bg-white border text-slate-800 hover:bg-slate-50'}`}>
+            <button onClick={() => { setActiveTab('Samenvatting'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`w-full text-left px-4 py-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center shadow-md ${ activeTab === 'Samenvatting' ? 'bg-blue-600 text-white' : 'bg-white border text-slate-800 hover:bg-slate-50'}`}>
               <LayoutList size={18} className="mr-2" /> Bekijk Actieplan
             </button>
           </div>
         </div>
       </div>
 
-      <div className="flex-grow h-screen overflow-y-auto bg-slate-100">
+      {/* Main Content Area - Natural Scroll */}
+      <div className="flex-grow bg-slate-100 min-h-screen">
         {loadingDb ? (
-          <div className="flex items-center justify-center h-full"><Loader2 className="animate-spin text-blue-500 w-10 h-10" /></div>
+          <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="animate-spin text-blue-500 w-10 h-10" /></div>
         ) : (
           <div className="max-w-5xl mx-auto p-6 md:p-10 pb-20">
             {activeTab !== 'Samenvatting' ? (
