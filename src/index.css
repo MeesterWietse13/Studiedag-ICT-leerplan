@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@layer components {
+  .pdf-only {
+    display: none;
+  }
+}
+
+/* Styles specifically for the PDF generation window and print */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Custom classes for html2pdf to handle visibility */
+.pdf-container .pdf-only {
+  display: block;
+}
