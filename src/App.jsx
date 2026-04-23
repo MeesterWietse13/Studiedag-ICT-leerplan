@@ -59,7 +59,19 @@ const GoalRow = ({ goal, currentStatus, onStatusChange }) => {
             {goal.id}
           </span>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold text-slate-800 leading-snug">{goal.leerdoel}</span>
+            <span className="text-sm font-semibold text-slate-800 leading-snug">
+              {goal.leerdoel}
+              {goal.niveau && (
+                <span className={`inline-flex ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase border align-middle tracking-wider ${
+                  goal.niveau === 'B' ? 'bg-yellow-100 text-yellow-800 border-yellow-300' :
+                  goal.niveau === 'G' ? 'bg-teal-100 text-teal-800 border-teal-300' :
+                  goal.niveau === 'E' ? 'bg-purple-100 text-purple-800 border-purple-300' :
+                  'bg-slate-100 text-slate-800 border-slate-300'
+                }`}>
+                  {goal.niveau === 'B' ? 'Begrijpen' : goal.niveau === 'G' ? 'Gebruiken' : goal.niveau === 'E' ? 'Engageren' : goal.niveau}
+                </span>
+              )}
+            </span>
             {hasExtraInfo && (
               <button onClick={() => setExpanded(!expanded)} className="text-xs font-medium text-slate-500 hover:text-blue-600 flex items-center mt-1 w-max">
                 {expanded ? <ChevronUp size={14} className="mr-1"/> : <Info size={14} className="mr-1"/>}
@@ -83,7 +95,7 @@ const GoalRow = ({ goal, currentStatus, onStatusChange }) => {
       </div>
       {expanded && hasExtraInfo && (
         <div className="px-14 pb-5 pt-3 bg-slate-50/80 text-slate-700 space-y-4 border-t border-slate-200">
-          {goal.mia && <div><strong className="text-slate-900 block border-b pb-1 mb-2 uppercase text-xs">Achtergrondinfo</strong><FormattedText text={goal.mia} /></div>}
+          {goal.mia && <div><strong className="text-slate-900 block border-b pb-1 mb-2 uppercase text-xs">MIA</strong><FormattedText text={goal.mia} /></div>}
           {goal.begrippen && <div><strong className="text-slate-900 block border-b pb-1 mb-2 uppercase text-xs">Begrippen</strong><p className="text-sm">{goal.begrippen}</p></div>}
           {goal.voorbeelden && <div><strong className="text-slate-900 block border-b pb-1 mb-2 uppercase text-xs">Voorbeelden</strong><FormattedText text={goal.voorbeelden} /></div>}
         </div>
